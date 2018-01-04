@@ -4,10 +4,10 @@ class PaymentController < ApplicationController
   before_action :authenticate_user!
 
   def validate
-    create_subscription_service = CreateSubscriptionService.new
-    response = create_subscription_service.call(current_user, payment_params, 100)
+    create_subscription_service = CreateSubscriptionService.new(current_user, payment_params, 100)
+    response = create_subscription_service.call
 
-    render json: { success: response.success?, message: response.message }
+    render json: response
   end
 
   private
