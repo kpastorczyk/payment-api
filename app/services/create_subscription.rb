@@ -9,30 +9,21 @@ module Services
 
     def call
       amount = @amount * 100 # $100.00
-      credit_card = ActiveMerchant::Billing::CreditCard.new(
-        first_name: @params[:first_name],
-        last_name: @params[:last_name],
-        number: @params[:number],
-        month: @params[:month],
-        year: @params[:year],
-        verification_value: @params[:verification_value]
-      )
-      credit_card_validation = credit_card.validate
 
-      if credit_card_validation.empty?
+      if credit_card.validate.empty?
         response = @gateway.purchase(amount, credit_card)
         persist_transaction(response)
 
         return get_response(response.success?, response.message)
       end
 
-      get_response(false, credit_card_validation)
+      get_response(false, credit_card.validate)
     end
 
     private
 
     def persist_transaction(response)
-      transaction = PaymentSubscription.new(
+      PaymentSubscription.new(
         first_name: @params[:first_name],
         last_name: @params[:last_name],
         number: @params[:number],
@@ -41,8 +32,18 @@ module Services
         verification_value: @params[:verification_value],
         user_id: @user.id,
         paid: response.success?
+      ).save
+    end
+
+    def credit_card
+      ActiveMerchant::Billing::CreditCard.new(
+        first_name: @params[:first_name],
+        last_name: @params[:last_name],
+        number: @params[:number],
+        month: @params[:month],
+        year: @params[:year],
+        verification_value: @params[:verification_value]
       )
-      transaction.save
     end
 
     def get_response(success, message)
@@ -53,4 +54,3 @@ module Services
     end
   end
 end
-
