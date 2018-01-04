@@ -10,7 +10,11 @@ module Adapters
     end
 
     def purchase(amount, credit_card)
-      @gateway.purchase(amount, credit_card)
+      if [true, false].sample
+        raise Timeout::Error
+      else
+        @gateway.purchase(amount, credit_card)
+      end
     end
   end
 end
