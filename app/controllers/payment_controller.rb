@@ -2,36 +2,17 @@ require 'active_merchant'
 
 class PaymentController < ApplicationController
   before_action :authenticate_user!
-  ActiveMerchant::Billing::Base.mode = :test
 
   def validate
+    create_subscription_service = CreateSubscriptionService.new
+    response = create_subscription_service.call(current_user, payment_params, 100)
 
-    gateway = ActiveMerchant::Billing::TrustCommerceGateway.new(
-        :login => 'TestMerchant',
-        :password => 'password')
+    render json: { success: response.success?, message: response.message }
+  end
 
-    amount = 10000  # $100.00
+  private
 
-    credit_card = ActiveMerchant::Billing::CreditCard.new(
-        :first_name         => 'Bob',
-        :last_name          => 'Bobsen',
-        :number             => '4242424242424242',
-        :month              => '8',
-        :year               => Time.now.year+1,
-        :verification_value => '000')
-
-    if credit_card.validate.empty?
-      # Capture $10 from the credit card
-      response = gateway.purchase(amount, credit_card)
-
-      if response.success?
-        render json: {
-            success: true,
-            amount: amount / 100
-        }
-      else
-        raise StandardError, response.message
-      end
-    end
+  def payment_params
+    params.permit(:first_name, :last_name, :number, :month, :year, :verification_value)
   end
 end
