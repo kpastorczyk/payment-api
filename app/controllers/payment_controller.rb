@@ -1,10 +1,8 @@
-require 'active_merchant'
-
 class PaymentController < ApplicationController
   before_action :authenticate_user!
 
   def validate
-    create_subscription_service = CreateSubscriptionService.new(current_user, payment_params, 100)
+    create_subscription_service = ::Services::CreateSubscription.new(current_user, payment_params, 100)
     response = create_subscription_service.call
 
     render json: response

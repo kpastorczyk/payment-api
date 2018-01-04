@@ -13,7 +13,7 @@ AllCops:
     - 'script/**'
     - 'db/schema.rb'
     - 'bin/**'
-    - 'db/migrate/20180103183643_devise_token_auth_create_users.rb'
+    - 'db/migrate/**'
   TargetRubyVersion: '2.4'
 Style/FrozenStringLiteralComment:
   Enabled: false
