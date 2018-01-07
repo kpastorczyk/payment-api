@@ -15,7 +15,7 @@ RSpec.describe Services::CreateSubscription do
 
   describe "#call" do
     let(:current_user) do
-      build(:user)
+      create(:user)
     end
 
     let(:payment_params) do
@@ -24,8 +24,8 @@ RSpec.describe Services::CreateSubscription do
           last_name: "Mental",
           number: "4242424242424242",
           month: "07",
-          year: "2017",
-          verification_value: 000
+          year: Time.now.year+1,
+          verification_value: "002"
       }
     end
 
@@ -46,6 +46,24 @@ RSpec.describe Services::CreateSubscription do
 
       it "raise error" do
         expect { service.call }.to raise_error
+      end
+    end
+
+    context "call" do
+      it "return success" do
+        response = service.call
+        expect(response)
+            .to eq({success: true, message: "The transaction was successful"})
+      end
+
+      it "save info about transaction" do
+        service.call
+        transaction = PaymentSubscription.last
+        expect(transaction).to have_attributes({
+                                                   first_name: payment_params[:first_name],
+                                                   last_name: payment_params[:last_name],
+                                                   user_id: current_user.id,
+                                               })
       end
     end
   end
