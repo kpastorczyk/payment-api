@@ -6,6 +6,11 @@ class PaymentController < ApplicationController
     response = create_subscription_service.call
 
     render json: response
+  rescue => e
+    render json: {
+        success: false,
+        message: e.to_json
+    }
   end
 
   private
